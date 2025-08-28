@@ -22,9 +22,12 @@ export const DeploySSHKeySchema = z.object({
     username: z.string(),
     server_name: z.string().optional(),
     provider: z.string().optional()
-  })),
+  })).default([]),
   deployment_method: z.enum(['authorized_keys', 'cloud_init', 'manual']).default('authorized_keys'),
   backup_existing: z.boolean().default(true),
+  deploy_to_all_droplets: z.boolean().default(false),
+  provider: z.enum(['digitalocean']).default('digitalocean'),
+  add_to_provider_account: z.boolean().default(true),
   workspace_id: z.string(),
   user_id: z.string(),
   jwt_token: z.string()
@@ -117,7 +120,28 @@ export const BulkKeyManagementSchema = z.object({
   jwt_token: z.string()
 })
 
+// New systematic SSH execution schema
+export const SystematicSSHExecutionSchema = z.object({
+  serverId: z.string().min(1, 'Server ID/IP is required'),
+  command: z.string().min(1, 'Command is required'),
+  workingDirectory: z.string().optional(),
+  timeout: z.number().default(30000),
+  environment: z.record(z.string()).optional(),
+  sudo: z.boolean().default(false),
+  userId: z.string().min(1, 'User ID is required'),
+  workspaceId: z.string().min(1, 'Workspace ID is required'),
+  jwt_token: z.string().min(1, 'JWT token is required'),
+  // Session-aware fields for cross-conversation SSH key persistence
+  sessionId: z.string().optional(),
+  conversationId: z.string().optional()
+})
+
 export const HERMES_MCP_TOOLS = [
+  {
+    name: 'hermes_execute_ssh_command_v2',
+    description: 'Execute SSH command with automatic session management, key discovery, and proper error handling. This is the systematic abstraction for all SSH operations based on CLI POC learnings.',
+    inputSchema: SystematicSSHExecutionSchema
+  },
   {
     name: 'hermes_generate_ssh_key',
     description: 'Generate new SSH key pair with secure storage and metadata',

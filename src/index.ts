@@ -198,6 +198,24 @@ fastify.post('/api/v1/ssh/audit', async (request, reply) => {
   }
 })
 
+// Sync SSH key to Context Manager
+fastify.post('/api/v1/ssh-keys/:keyId/sync-to-context-manager', async (request, reply) => {
+  try {
+    const { keyId } = request.params as { keyId: string }
+    const args = { 
+      key_id: keyId,
+      jwt_token: 'dev-token-123' // Development mode token
+    }
+    const result = await mcpHandler.handleToolCall('hermes_sync_key_to_context_manager', args)
+    reply.send(result)
+  } catch (error: any) {
+    reply.status(500).send({
+      success: false,
+      error: error.message
+    })
+  }
+})
+
 // Security monitoring endpoints
 fastify.get('/api/v1/security/status', async (request, reply) => {
   try {
@@ -242,7 +260,7 @@ async function gracefulShutdown() {
     fastify.log.info('Hermes service stopped')
     process.exit(0)
   } catch (error) {
-    fastify.log.error('Error during shutdown:', error)
+    fastify.log.error({ error }, 'Error during shutdown')
     process.exit(1)
   }
 }

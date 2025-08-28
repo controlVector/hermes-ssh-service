@@ -32,6 +32,11 @@ export interface SSHKeyMetadata {
   tags: string[]
   userId: string
   workspaceId: string
+  // Session-aware fields for production persistence
+  sessionId?: string
+  conversationId?: string
+  deploymentTarget?: string
+  reusable: boolean // Whether key can be reused across deployments
 }
 
 export interface SSHConnection {
@@ -183,6 +188,11 @@ export interface KeyGenerationOptions {
   expiresIn?: number // days
   userId: string
   workspaceId: string
+  // Session-aware options
+  sessionId?: string
+  conversationId?: string
+  deploymentTarget?: string
+  reusable?: boolean
 }
 
 export interface ConnectionOptions {
